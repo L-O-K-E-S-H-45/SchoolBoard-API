@@ -26,7 +26,6 @@ public class UserRequest {
 	@NotNull(message = "UserName cannot be null!!!")
 	@NotBlank(message = "UserName cannot be blank!!!")
 	@Pattern(regexp = "^[a-zA-Z0-9]+$", message = "UserName must be alphanumeric only")
-	@Column(unique = true)
 	private String userName;
 	
 	@NotNull(message = "User FirstName cannot be null!!!")
@@ -46,13 +45,12 @@ public class UserRequest {
 	
 	@NotNull(message = "User Email cannot be null!!!")
 	@NotBlank(message = "User Email cannot be blank!!!")
-	@Column(unique = true)
 	@Email(regexp = "[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}", message = "Invalid Email ")
 	private String email;
 	
 	@NotNull(message = "User password cannot be null!!!")
 	@NotBlank(message = "User password cannot be blank!!!")
-	@Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
+	@Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters") 
 	@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Password must"
 			+ " contain at least one uppercase letter, one lowercase letter, one number, one special character")
 	private String password;

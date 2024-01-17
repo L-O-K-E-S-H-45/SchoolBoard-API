@@ -56,8 +56,13 @@ public class UserServiceImplemetation implements UserService {
 
 	@Override
 	public ResponseEntity<ResponseStructure<UserResponse>> saveUser(UserRequest userRequest) {
+//		if (userRequest.getUserRole()==UserRole.ADMIN  && 
+//				userRepo.findByUserRole(userRequest.getUserRole()).size()==1) {
+//			throw new UnAuthourizedRegistrationException("Failed to save User!!!");
+//		}
+		
 		if (userRequest.getUserRole()==UserRole.ADMIN  && 
-				userRepo.findByUserRole(userRequest.getUserRole()).size()==1) {
+				userRepo.existsByUserRole(userRequest.getUserRole())) {
 			throw new UnAuthourizedRegistrationException("Failed to save User!!!");
 		}
 		

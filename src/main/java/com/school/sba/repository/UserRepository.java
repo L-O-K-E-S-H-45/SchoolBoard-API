@@ -9,6 +9,8 @@ import com.school.sba.enums.UserRole;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 	
+	boolean existsByUserRole(UserRole userRole);
+	
 	List<User> findByUserRole(UserRole userRole);
 	
 	User findByEmail(String userEmail);
