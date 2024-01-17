@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.school.sba.dtos.SchoolRequest;
-import com.school.sba.dtos.SchoolResponse;
+import com.school.sba.request_dto.SchoolRequest;
+import com.school.sba.response_dto.SchoolResponse;
 import com.school.sba.service.SchoolService;
 import com.school.sba.utility.ResponseStructure;
 

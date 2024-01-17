@@ -9,7 +9,7 @@ public class SchoolBoardApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolBoardApiApplication.class, args);
 		
-		System.out.println("Hello!!!");
+		System.out.println("Helloooo!!!");
 	}
 
 }

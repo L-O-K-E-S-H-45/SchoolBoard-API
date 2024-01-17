@@ -25,8 +25,8 @@ public class School {
 	private String emailId;
 	private String address;
 	
-	@OneToOne(mappedBy = "school")
-	private Schedule schedule;
+//	@OneToOne(mappedBy = "school")
+//	private Schedule schedule;
 	
 
 }

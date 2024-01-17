@@ -9,11 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.school.sba.dtos.SchoolRequest;
-import com.school.sba.dtos.SchoolResponse;
 import com.school.sba.entities.School;
 import com.school.sba.exception.SchoolNotfoundByIdException;
 import com.school.sba.repository.SchoolRepository;
+import com.school.sba.request_dto.SchoolRequest;
+import com.school.sba.response_dto.SchoolResponse;
 import com.school.sba.service.SchoolService;
 import com.school.sba.utility.ResponseStructure;
 

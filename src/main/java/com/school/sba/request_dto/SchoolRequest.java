@@ -1,12 +1,13 @@
-package com.school.sba.dtos;
+package com.school.sba.request_dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class SchoolResponse {
+public class SchoolRequest {
 	
+//	@NotNull(message = "Student Name cannot be Null!!")
 	private String schoolName;
 	private long contactNo;
 	private String emailId;
