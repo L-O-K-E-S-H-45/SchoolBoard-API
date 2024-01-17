@@ -10,8 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.school.sba.entities.School;
+import com.school.sba.entities.User;
+import com.school.sba.enums.UserRole;
+import com.school.sba.exception.SchoolAlreadyExistException;
 import com.school.sba.exception.SchoolNotfoundByIdException;
+import com.school.sba.exception.UnAuthourizeduserException;
+import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.SchoolRepository;
+import com.school.sba.repository.UserRepository;
 import com.school.sba.request_dto.SchoolRequest;
 import com.school.sba.response_dto.SchoolResponse;
 import com.school.sba.service.SchoolService;
@@ -22,29 +28,54 @@ public class SchoolServiceimplementaion implements SchoolService  {
 	
 	@Autowired
 	private SchoolRepository schoolRepo;
+	
+	@Autowired
+	private UserRepository userRepo;
+	
+	@Autowired
+	private ResponseStructure<SchoolResponse> structure;
+	
+	private School mapRequestToSchoolObject(SchoolRequest schoolRequest) {
+		return School.builder()
+				.schoolName(schoolRequest.getSchoolName())
+				.schoolContactNo(schoolRequest.getSchoolContactNo())
+				.schoolEmail(schoolRequest.getSchoolEmail())
+				.schoolAddress(schoolRequest.getSchoolAddress())
+				.build();
+	}
+	
+	private SchoolResponse mapSchoolObjectToSchoolResponse(School school) {
+		return SchoolResponse.builder()
+				.schoolId(school.getSchoolId())
+				.schoolName(school.getSchoolName())
+				.schoolContactNo(school.getSchoolContactNo())
+				.schoolEmail(school.getSchoolEmail())
+				.schoolAddress(school.getSchoolAddress())
+				.build();
+	}
 
 	@Override
-	public ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(SchoolRequest request) {
-		School school = new School();
-		school.setSchoolName(request.getSchoolName());
-		school.setContactNo(request.getContactNo());
-		school.setEmailId(request.getEmailId());
-		school.setAddress(request.getAddress());
+	public ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(int userId, SchoolRequest schoolRequest) {
+		return userRepo.findById(userId)
+				.map(u->{
+					if (u.getUserRole().equals(UserRole.ADMIN)) {
+						if (u.getSchool()==null) {
+							School school = mapRequestToSchoolObject(schoolRequest);
+							school = schoolRepo.save(school);
+							u.setSchool(school);
+							userRepo.save(u);
+							structure.setStatus(HttpStatus.CREATED.value());
+							structure.setMessage("School saved successfully!!!");
+							structure.setData(mapSchoolObjectToSchoolResponse(school));
+							return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.CREATED);
+							} else 
+							throw new SchoolAlreadyExistException("Failed to save School!!!");
+						
+					} else
+						throw new UnAuthourizeduserException("Failed to save School!!!");
+				})
+				.orElseThrow(()-> new UserNotFoundByIdException("Failed to save School!!!"));
 		
-		school=schoolRepo.save(school);
-		
-		SchoolResponse response = new SchoolResponse();
-		response.setSchoolName(school.getSchoolName());
-		response.setContactNo(school.getContactNo());
-		response.setEmailId(school.getEmailId());
-		response.setAddress(school.getAddress());
-		
-		ResponseStructure<SchoolResponse> structure = new ResponseStructure<>();
-		structure.setStatus(HttpStatus.CREATED.value());
-		structure.setMessage("School data saved successfully!!!");
-		structure.setData(response);
-		
-		return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.CREATED);
 	}
 
 	@Override
@@ -53,17 +84,17 @@ public class SchoolServiceimplementaion implements SchoolService  {
 		if (optionals.isPresent()) {
 			School school = optionals.get();
 			school.setSchoolName(request.getSchoolName());
-			school.setContactNo(request.getContactNo());
-			school.setEmailId(request.getEmailId());
-			school.setAddress(request.getAddress());
+//			school.setContactNo(request.getContactNo());
+//			school.setEmailId(request.getEmailId());
+//			school.setAddress(request.getAddress());
 			
 			school = schoolRepo.save(school);
 			
 			SchoolResponse response = new SchoolResponse();
 			response.setSchoolName(school.getSchoolName());
-			response.setContactNo(school.getContactNo());
-			response.setEmailId(school.getEmailId());
-			response.setAddress(school.getAddress());
+//			response.setContactNo(school.getContactNo());
+//			response.setEmailId(school.getEmailId());
+//			response.setAddress(school.getAddress());
 			
 			ResponseStructure<SchoolResponse> structure = new ResponseStructure<>();
 			structure.setStatus(HttpStatus.ACCEPTED.value());
@@ -84,10 +115,10 @@ public class SchoolServiceimplementaion implements SchoolService  {
 			for (School school : scList) {
 				SchoolResponse response = new SchoolResponse();
 				response.setSchoolName(school.getSchoolName());
-				response.setContactNo(school.getContactNo());
-				response.setEmailId(school.getEmailId());
-				response.setAddress(school.getAddress());
-				
+				response.setSchoolId(school.getSchoolId());
+				response.setSchoolContactNo(school.getSchoolContactNo());
+				response.setSchoolEmail(school.getSchoolEmail());
+				response.setSchoolAddress(school.getSchoolAddress());
 				scResList.add(response);
 			}
 			
@@ -113,9 +144,9 @@ public class SchoolServiceimplementaion implements SchoolService  {
 			
 			SchoolResponse response = new SchoolResponse();
 			response.setSchoolName(school.getSchoolName());
-			response.setContactNo(school.getContactNo());
-			response.setEmailId(school.getEmailId());
-			response.setEmailId(school.getEmailId());
+//			response.setContactNo(school.getContactNo());
+//			response.setEmailId(school.getEmailId());
+//			response.setEmailId(school.getEmailId());
 			
 			ResponseStructure<SchoolResponse> structure = new ResponseStructure<>();
 			structure.setStatus(HttpStatus.FOUND.value());

@@ -51,6 +51,7 @@ public class UserServiceImplemetation implements UserService {
 				.contactNo(user.getContactNo())
 				.email(user.getEmail())
 				.userRole(user.getUserRole())
+				.school(user.getSchool())
 				.build();
 	}
 

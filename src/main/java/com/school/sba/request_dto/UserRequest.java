@@ -39,7 +39,7 @@ public class UserRequest {
 	private String lastName;
 	
 	
-	@Min(value = 6000000000L, message = "ContactNo must start with >=6000000000L")
+	@Min(value = 6000000000L, message = "ContactNo must be >=6000000000L")
 	@Max(value = 9999999999L, message = "ContactNo must not be greater than 10 digit")
 	private long contactNo;
 	

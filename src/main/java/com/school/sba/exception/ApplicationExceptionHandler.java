@@ -47,6 +47,31 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	public ResponseEntity<Object> handleUserNotFoundByIdException(UserNotFoundByIdException ex){
 		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "User does not exist for requested ID!!!");
 	}
+	
+	@ExceptionHandler(UnAuthourizeduserException.class)
+	public ResponseEntity<Object> handleUnAuthourizeduserException(UnAuthourizeduserException ex){
+		return structure(HttpStatus.UNAUTHORIZED, ex.getMessage(), "User is not a ADMIN");
+	}
+	
+	@ExceptionHandler(SchoolAlreadyExistException.class)
+	public ResponseEntity<Object> handleSchoolAlreadyExistException(SchoolAlreadyExistException ex){
+		return structure(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), "School already exists!!!");
+	}
+	
+	@ExceptionHandler(IllegalRequestException.class)
+	public ResponseEntity<Object> handleIlligalRequestException(IllegalRequestException ex){
+		return structure(HttpStatus.BAD_REQUEST, ex.getMessage(), "Illigal Request!!!");
+	}
+	
+	@ExceptionHandler(SchoolNotfoundByIdException.class)
+	public ResponseEntity<Object> handleSchoolNotfoundByIdException(SchoolNotfoundByIdException ex){
+		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "School does not exist for requested Id!!!");
+	}
+	
+	@ExceptionHandler(ScheduleNotFoundByIdException.class)
+	public ResponseEntity<Object> handleScheduleNotFoundByIdException(ScheduleNotFoundByIdException ex){
+		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "Schedule does not exist for requested Id!!!");
+	}
 
 }
 

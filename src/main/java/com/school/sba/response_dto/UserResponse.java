@@ -2,9 +2,9 @@ package com.school.sba.response_dto;
 
 import org.springframework.stereotype.Component;
 
+import com.school.sba.entities.School;
 import com.school.sba.enums.UserRole;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,5 +26,7 @@ public class UserResponse {
 	private long contactNo;
 	private String email;
 	private UserRole userRole;
+	
+	private School school;
 
 }
