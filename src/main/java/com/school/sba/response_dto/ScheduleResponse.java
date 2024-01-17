@@ -1,42 +1,36 @@
-package com.school.sba.entities;
+package com.school.sba.response_dto;
+
 import java.time.Duration;
 import java.time.LocalTime;
 
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import com.school.sba.entities.School;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Component
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Schedule {
+@Data
+public class ScheduleResponse {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int scheduleId;
 	private LocalTime opensAt;
 	private LocalTime closesAt;
 	private int classHoursPerDay;
-	private Duration classHourLengthInMilSec;
+	private int classHourLengthInMinutes;
 	private LocalTime breakTime;
-	private Duration breakLengthInMilSecs;
+	private int breakLengthInMinutes;
 	private LocalTime lunchTime;
-	private Duration lunchLengthInMilSecs;
+	private int lunchLengthInMinutes;
 	
-	@OneToOne
-	private School school;
-
 }

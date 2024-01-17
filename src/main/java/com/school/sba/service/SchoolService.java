@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
-import com.school.sba.dtos.SchoolRequest;
-import com.school.sba.dtos.SchoolResponse;
+import com.school.sba.request_dto.SchoolRequest;
+import com.school.sba.response_dto.SchoolResponse;
 import com.school.sba.utility.ResponseStructure;
 
 public interface SchoolService {
 	
-	ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(SchoolRequest request);
+	ResponseEntity<ResponseStructure<SchoolResponse>> saveSchool(int userId, SchoolRequest schoolRequest);
 	
 	ResponseEntity<ResponseStructure<SchoolResponse>> updateSchool(SchoolRequest request, int schoolId);
 	

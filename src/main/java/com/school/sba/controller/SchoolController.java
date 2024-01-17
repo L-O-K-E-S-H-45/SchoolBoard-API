@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.school.sba.dtos.SchoolRequest;
-import com.school.sba.dtos.SchoolResponse;
+import com.school.sba.request_dto.SchoolRequest;
+import com.school.sba.response_dto.SchoolResponse;
 import com.school.sba.service.SchoolService;
 import com.school.sba.utility.ResponseStructure;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class SchoolController {
@@ -27,9 +29,9 @@ public class SchoolController {
 	@Autowired
 	private SchoolService schoolService;
 	
-	@PostMapping("/schools")
-	public ResponseEntity<ResponseStructure<SchoolResponse>> saveschool(@RequestBody SchoolRequest request){
-		return schoolService.saveSchool(request);
+	@PostMapping("/users/{userId}/schools")
+	public ResponseEntity<ResponseStructure<SchoolResponse>> saveschool(@PathVariable int userId, @RequestBody @Valid SchoolRequest schoolRequest){
+		return schoolService.saveSchool(userId,schoolRequest);
 	}
 	
 	@PutMapping("/schools/{schoolId}")
