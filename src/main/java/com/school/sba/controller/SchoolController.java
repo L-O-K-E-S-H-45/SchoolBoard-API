@@ -40,6 +40,11 @@ public class SchoolController {
 		return schoolService.updateSchool(request, schoolId);
 	}
 	
+	@PutMapping("/schools/{schoolId}")
+	public ResponseEntity<ResponseStructure<SchoolResponse>> findSchoolById(@PathVariable int schoolId){
+		return schoolService.findSchoolById(schoolId);
+	}
+	
 	@GetMapping("/schools")
 	public ResponseEntity<ResponseStructure<List<SchoolResponse>>> fetchAllSchools(){
 		return schoolService.fetchAllSchools();

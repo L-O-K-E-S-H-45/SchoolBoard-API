@@ -18,4 +18,6 @@ public interface SchoolService {
 	
 	ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchool(int schoolId);
 
+	ResponseEntity<ResponseStructure<SchoolResponse>> findSchoolById(int schoolId);
+
 }

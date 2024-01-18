@@ -1,6 +1,11 @@
 package com.school.sba.entities;
 
-import com.school.sba.enums.UserRole;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.school.sba.enums.ProgramType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +14,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,30 +29,28 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+public class AcademicProgram {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int userId;
-	
-	@Column(unique = true)
-	private String userName;
-	private String firstName;
-	private String lastName;
-	private long contactNo;
-	
-	@Column(unique = true)
-	private String email;
-	private String password;
+	private int programId;
 	
 	@Enumerated(EnumType.STRING)
-	private UserRole userRole;
-	private boolean isDeleted;
+	private ProgramType programType;
+	@Column(unique = true)
+	private String programName;
+//	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDate programBeginsAt;
+//	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDate programEndsAt;
 	
 	@ManyToOne
 	private School school;
 	
-	@ManyToOne
-	private AcademicProgram academicProgram;
+	@OneToMany(mappedBy = "academicProgram")
+	private List<User> usersList;
+	
+	@ManyToMany
+	private List<Subject> subjects;
 	
 }
