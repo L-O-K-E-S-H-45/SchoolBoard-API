@@ -1,5 +1,7 @@
 package com.school.sba.request_dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +9,6 @@ import lombok.Setter;
 @Setter
 public class SubjectRequest {
 	
-	private String subjectName[];
+	private List<String> subjectNames;
 
 }

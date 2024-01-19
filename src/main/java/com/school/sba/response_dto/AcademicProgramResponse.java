@@ -1,6 +1,7 @@
 package com.school.sba.response_dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,7 @@ public class AcademicProgramResponse {
 	private String programName;
 	private LocalDate programBeginsAt;
 	private LocalDate programEndsAt;
+	
+	private List<String> subjects;
 
 }

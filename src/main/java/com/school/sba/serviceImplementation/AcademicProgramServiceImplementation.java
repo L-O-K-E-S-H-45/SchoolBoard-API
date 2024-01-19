@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.school.sba.entities.AcademicProgram;
+import com.school.sba.entities.Subject;
 import com.school.sba.enums.ProgramType;
 import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.SchoolNotfoundByIdException;
@@ -40,13 +41,21 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 				.build();
 	}
 
-	private AcademicProgramResponse mapObjectToAcademicProgramResponse(AcademicProgram academicProgram) {
+	public AcademicProgramResponse mapObjectToAcademicProgramResponse(AcademicProgram academicProgram) {
+		List<String> subjectList = new ArrayList<>();
+		if (academicProgram.getSubjects()!=null) {
+			academicProgram.getSubjects().forEach(subject->{
+				subjectList.add(subject.getSubjectName());
+			});
+		}
+		
 		return AcademicProgramResponse.builder()
 				.programId(academicProgram.getProgramId())
 				.programType(academicProgram.getProgramType())
 				.programName(academicProgram.getProgramName())
 				.programBeginsAt(academicProgram.getProgramBeginsAt())
 				.programEndsAt(academicProgram.getProgramEndsAt())
+				.subjects(subjectList)
 				.build();
 	}
 
