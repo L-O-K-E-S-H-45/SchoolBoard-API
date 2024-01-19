@@ -79,31 +79,31 @@ public class SchoolServiceimplementaion implements SchoolService  {
 	}
 
 	@Override
+	public ResponseEntity<ResponseStructure<SchoolResponse>> findSchoolById(int schoolId) {
+		return schoolRepo.findById(schoolId)
+				.map(school->{
+					structure.setStatus(HttpStatus.FOUND.value());
+					structure.setMessage("School found successfully!!!");
+					structure.setData(mapSchoolObjectToSchoolResponse(school));
+					return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.FOUND);
+				})
+				.orElseThrow(()-> new SchoolNotfoundByIdException("School did not found!!!"));
+	}
+
+	@Override
 	public ResponseEntity<ResponseStructure<SchoolResponse>> updateSchool(SchoolRequest request, int schoolId) {
-		Optional<School> optionals = schoolRepo.findById(schoolId);
-		if (optionals.isPresent()) {
-			School school = optionals.get();
-			school.setSchoolName(request.getSchoolName());
-//			school.setContactNo(request.getContactNo());
-//			school.setEmailId(request.getEmailId());
-//			school.setAddress(request.getAddress());
-			
-			school = schoolRepo.save(school);
-			
-			SchoolResponse response = new SchoolResponse();
-			response.setSchoolName(school.getSchoolName());
-//			response.setContactNo(school.getContactNo());
-//			response.setEmailId(school.getEmailId());
-//			response.setAddress(school.getAddress());
-			
-			ResponseStructure<SchoolResponse> structure = new ResponseStructure<>();
-			structure.setStatus(HttpStatus.ACCEPTED.value());
-			structure.setMessage("school data updated successfully!!!");
-			structure.setData(response);
-			
-			return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.ACCEPTED);
-		}
-		throw new SchoolNotfoundByIdException("School data did not updated!!!");
+		return schoolRepo.findById(schoolId)
+				.map(school->{
+					School school1=mapRequestToSchoolObject(request);
+					school1.setSchoolId(schoolId);
+					school1=schoolRepo.save(school1);
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("School updated successfully!!!");
+					structure.setData(mapSchoolObjectToSchoolResponse(school1));
+					return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.OK);
+				})
+				.orElseThrow(()-> new SchoolNotfoundByIdException("School data did not updated!!!"));
+
 	}
 
 	@Override
