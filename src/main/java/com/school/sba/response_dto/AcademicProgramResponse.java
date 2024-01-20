@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.school.sba.entities.User;
 import com.school.sba.enums.ProgramType;
 
 import lombok.AllArgsConstructor;
@@ -28,5 +29,7 @@ public class AcademicProgramResponse {
 	private LocalDate programEndsAt;
 	
 	private List<String> subjects;
+	
+	private List<String> usersNames;
 
 }

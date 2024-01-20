@@ -1,8 +1,12 @@
 package com.school.sba.response_dto;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.school.sba.entities.AcademicProgram;
 import com.school.sba.entities.School;
+import com.school.sba.entities.Subject;
 import com.school.sba.enums.UserRole;
 
 import lombok.AllArgsConstructor;
@@ -27,6 +31,10 @@ public class UserResponse {
 	private String email;
 	private UserRole userRole;
 	
-	private School school;
+//	private School school; // giving infinite loop during response between school & schedule
+	
+	private List<AcademicProgram> academicPrograms;
+	
+	private List<Subject>subjects; 
 
 }

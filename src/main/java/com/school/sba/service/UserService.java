@@ -18,4 +18,6 @@ public interface UserService {
 
 	ResponseEntity<ResponseStructure<UserResponse>> findUserById(int userId);
 
+	ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(int subjectId, int userId);
+
 }

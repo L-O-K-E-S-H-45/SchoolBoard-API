@@ -1,5 +1,8 @@
 package com.school.sba.entities;
 
+import java.util.List;
+import java.util.Set;
+
 import com.school.sba.enums.UserRole;
 
 import jakarta.persistence.Column;
@@ -9,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +49,17 @@ public class User {
 	@ManyToOne
 	private School school;
 	
-	@ManyToOne
-	private AcademicProgram academicProgram;
+	@ManyToMany(mappedBy = "users")
+	private List<AcademicProgram> academicPrograms;
+	
+	@ManyToMany
+	private List<Subject>subjects; 
 	
 }
+
+
+
+
+
+
+

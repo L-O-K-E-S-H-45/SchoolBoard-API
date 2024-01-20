@@ -7,12 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.school.sba.request_dto.AcademicProgramRequest;
 import com.school.sba.request_dto.SubjectRequest;
 import com.school.sba.response_dto.AcademicProgramResponse;
+import com.school.sba.response_dto.UserResponse;
 import com.school.sba.service.AcademicProgramService;
 import com.school.sba.utility.ResponseStructure;
 
@@ -34,5 +36,11 @@ public class AcademicProgramController {
 	public ResponseEntity<ResponseStructure<List<AcademicProgramResponse>>> findAllAcademicProgramBySchoolId(@PathVariable int schoolId){
 		return academicProgramService.findAllAcademicProgramBySchoolId(schoolId);
 	}
+
+	@PutMapping("/academic-programs/{programId}/users/{userId}")
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> setUserToAcademyProgram(@PathVariable int programId, @PathVariable int userId){
+		return academicProgramService.setUserToAcademyProgram(programId,userId);
+	}
+
 	
 }
