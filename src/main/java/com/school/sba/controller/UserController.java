@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.school.sba.request_dto.UserRequest;
+import com.school.sba.response_dto.AcademicProgramResponse;
 import com.school.sba.response_dto.UserResponse;
 import com.school.sba.service.UserService;
 import com.school.sba.utility.ResponseStructure;
@@ -43,6 +44,11 @@ public class UserController {
 	@GetMapping("/users/{userId}")
 	public ResponseEntity<ResponseStructure<UserResponse>> findUserById(@PathVariable int userId){
 		return userService.findUserById(userId);
+	}
+	
+	@PutMapping("/subjects/{subjectId}/users/{userId}")
+	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(@PathVariable int subjectId, @PathVariable int userId){
+		return userService.assignSubjectsToTeacher(subjectId,userId);
 	}
 	
 }

@@ -8,10 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entities.AcademicProgram;
+import com.school.sba.entities.Subject;
 import com.school.sba.entities.User;
 import com.school.sba.enums.UserRole;
+import com.school.sba.exception.AcademicProgramNotFoundByIdException;
+import com.school.sba.exception.IllegalRequestException;
+import com.school.sba.exception.SubjectNotFoundByIdException;
 import com.school.sba.exception.UnAuthourizedRegistrationException;
 import com.school.sba.exception.UserNotFoundByIdException;
+import com.school.sba.repository.AcademicProgramRepository;
+import com.school.sba.repository.SubjectRepository;
 import com.school.sba.repository.UserRepository;
 import com.school.sba.request_dto.UserRequest;
 import com.school.sba.response_dto.UserResponse;
@@ -26,6 +33,12 @@ public class UserServiceImplemetation implements UserService {
 	
 	@Autowired
 	private UserRepository userRepo;
+	
+	@Autowired
+	private AcademicProgramRepository academicProgramRepo;
+	
+	@Autowired
+	private SubjectRepository subjectRepo;
 	
 	@Autowired
 	private ResponseStructure<UserResponse> structure;
@@ -43,6 +56,7 @@ public class UserServiceImplemetation implements UserService {
 	}
 	
 	private UserResponse mapUserObjectToUserResponse(User user) {
+		
 		return UserResponse.builder()
 				.userId(user.getUserId())
 				.userName(user.getUserName())
@@ -51,28 +65,22 @@ public class UserServiceImplemetation implements UserService {
 				.contactNo(user.getContactNo())
 				.email(user.getEmail())
 				.userRole(user.getUserRole())
-				.school(user.getSchool())
+//				.school(user.getSchool()) // infinite loop during response between school & schedule
+				.subjects((user.getSubjects()))
 				.build();
 	}
 
 	@Override
 	public ResponseEntity<ResponseStructure<UserResponse>> saveUser(UserRequest userRequest) {
-//		if (userRequest.getUserRole()==UserRole.ADMIN  && 
-//				userRepo.findByUserRole(userRequest.getUserRole()).size()==1) {
-//			throw new UnAuthourizedRegistrationException("Failed to save User!!!");
-//		}
-		
-		if (userRequest.getUserRole()==UserRole.ADMIN  && 
-				userRepo.existsByUserRole(userRequest.getUserRole())) {
-			throw new UnAuthourizedRegistrationException("Failed to save User!!!");
-		}
-		
+		if ((userRequest.getUserRole()==UserRole.ADMIN && userRepo.existsByUserRole(userRequest.getUserRole())) ||
+				(!userRequest.getUserRole().equals(UserRole.ADMIN) && !userRepo.existsByUserRole(UserRole.ADMIN))	){
+				throw new UnAuthourizedRegistrationException("Failed to save User!!!");
+		} 
 		User user = userRepo.save(mapRequestToUserObject(userRequest));
 		
 		structure.setStatus(HttpStatus.CREATED.value());
 		structure.setMessage("User saved successfully!!!");
 		structure.setData(mapUserObjectToUserResponse(user));
-		
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure,HttpStatus.CREATED);
 		
 	}
@@ -139,6 +147,27 @@ public class UserServiceImplemetation implements UserService {
 		structure.setMessage("User found successfully!!!");
 		structure.setData(mapUserObjectToUserResponse(user));
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure,HttpStatus.FOUND);
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(int subjectId, int userId) {
+		Subject subject = subjectRepo.findById(subjectId)
+				.orElseThrow(()-> new SubjectNotFoundByIdException("Failed to assign Subjects to Teacher!!!"));
+		User user = userRepo.findById(userId)
+				.orElseThrow(()-> new UserNotFoundByIdException("Failed to assign Subjects to Teacher!!!"));
+		if (user.getUserRole()!=UserRole.TEACHER)
+			throw new IllegalRequestException("Failed to assign subjects to Teacher b/z user is a "+user.getUserRole());
+		List<Subject> subjects=(user.getSubjects()!=null)?user.getSubjects():new ArrayList<>();
+		if (subjects.isEmpty() || !subjects.contains(subject)) {
+			subjects.add(subject);
+			user.setSubjects(subjects);
+			user=userRepo.save(user);
+			structure.setStatus(HttpStatus.OK.value());
+			structure.setMessage("Assigned subject to Teacher");
+			structure.setData(mapUserObjectToUserResponse(user));
+			return new ResponseEntity<ResponseStructure<UserResponse>>(structure,HttpStatus.OK);
+		} else 
+			throw new IllegalRequestException("Failed to assign Subjects to Teacher b/z Subject already assigned!!!");
 	}
 
 }
