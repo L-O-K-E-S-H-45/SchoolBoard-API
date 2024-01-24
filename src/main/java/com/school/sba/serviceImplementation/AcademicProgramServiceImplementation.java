@@ -58,9 +58,11 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 			});
 		}
 		List<String> usersNames=new ArrayList();
-		academicProgram.getUsers().forEach(user->{
-			usersNames.add(user.getUserName());
-		});
+		if (academicProgram.getUsers()!=null) {
+			academicProgram.getUsers().forEach(user->{
+				usersNames.add(user.getUserName());
+			});
+		}
 		return AcademicProgramResponse.builder()
 				.programId(academicProgram.getProgramId())
 				.programType(academicProgram.getProgramType())
@@ -89,7 +91,6 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 							(academicProgramRequest.getProgramType().equals(ProgramType.HIGHER) && 
 									(academicProgramRequest.getProgramName().substring(0, 2).equals("11") ||
 											academicProgramRequest.getProgramName().substring(0, 2).equals("12"))	)	) {
-
 						AcademicProgram academicProgram = mapRequestToAcademicProgram(academicProgramRequest);
 						academicProgram.setSchool(school);
 						academicProgram = academicProgramRepo.save(academicProgram);

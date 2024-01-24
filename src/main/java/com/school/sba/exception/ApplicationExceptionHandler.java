@@ -40,7 +40,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	
 	@ExceptionHandler(UnAuthourizedRegistrationException.class)
 	public ResponseEntity<Object> handleUnAuthourizedRegistrationException(UnAuthourizedRegistrationException ex){
-		return structure(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), "School Admin already exist!!!");
+		return structure(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), "Admin already exist!!!");
 	}
 	
 	@ExceptionHandler(UserNotFoundByIdException.class)
