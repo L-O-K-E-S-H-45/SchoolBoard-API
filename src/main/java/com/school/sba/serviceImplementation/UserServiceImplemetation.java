@@ -17,6 +17,7 @@ import com.school.sba.exception.AcademicProgramNotFoundByIdException;
 import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.SubjectNotFoundByIdException;
 import com.school.sba.exception.UnAuthourizedRegistrationException;
+import com.school.sba.exception.UnAuthourizeduserException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepository;
 import com.school.sba.repository.SubjectRepository;
@@ -25,6 +26,8 @@ import com.school.sba.request_dto.UserRequest;
 import com.school.sba.response_dto.UserResponse;
 import com.school.sba.service.UserService;
 import com.school.sba.utility.ResponseStructure;
+
+import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImplemetation implements UserService {
@@ -75,6 +78,37 @@ public class UserServiceImplemetation implements UserService {
 	}
 
 	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> registerAdmin(UserRequest userRequest) {
+		if (userRequest.getUserRole()==UserRole.ADMIN ) {
+			if (!userRepo.existsByUserRole(userRequest.getUserRole())) {
+				User user = userRepo.save(mapRequestToUserObject(userRequest));
+				
+				structure.setStatus(HttpStatus.CREATED.value());
+				structure.setMessage("Admin registration successfull!!!");
+				structure.setData(mapUserObjectToUserResponse(user));
+				return new ResponseEntity<ResponseStructure<UserResponse>>(structure,HttpStatus.CREATED);
+			}
+			else 
+				throw new UnAuthourizedRegistrationException("Failed to save User!!!");
+			
+		} else 
+			throw new UnAuthourizeduserException("Failed to save User!!!");
+		
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> addOtherUser(UserRequest userRequest) {
+		if (userRequest.getUserRole().equals(UserRole.ADMIN)) {
+			throw new UnAuthourizedRegistrationException("Failed to save User!!!");
+		}
+		User user = userRepo.save(mapRequestToUserObject(userRequest));
+		
+		structure.setStatus(HttpStatus.CREATED.value());
+		structure.setMessage("User saved successfully!!!");
+		structure.setData(mapUserObjectToUserResponse(user));
+		return new ResponseEntity<ResponseStructure<UserResponse>>(structure,HttpStatus.CREATED);
+	}
+
 	public ResponseEntity<ResponseStructure<UserResponse>> saveUser(UserRequest userRequest) {
 		if ((userRequest.getUserRole()==UserRole.ADMIN && userRepo.existsByUserRole(userRequest.getUserRole())) ||
 				(!userRequest.getUserRole().equals(UserRole.ADMIN) && !userRepo.existsByUserRole(UserRole.ADMIN))	){

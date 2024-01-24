@@ -8,9 +8,14 @@ import com.school.sba.request_dto.UserRequest;
 import com.school.sba.response_dto.UserResponse;
 import com.school.sba.utility.ResponseStructure;
 
+import jakarta.validation.Valid;
+
 public interface UserService {
 
-	ResponseEntity<ResponseStructure<UserResponse>> saveUser(UserRequest userRequest);
+
+	ResponseEntity<ResponseStructure<UserResponse>> registerAdmin(UserRequest userRequest);
+
+	ResponseEntity<ResponseStructure<UserResponse>> addOtherUser(UserRequest userRequest);
 	
 	ResponseEntity<ResponseStructure<List<UserResponse>>> findAllUsers();
 
