@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.school.sba.enums.UserRole;
 import com.school.sba.request_dto.AcademicProgramRequest;
 import com.school.sba.request_dto.SubjectRequest;
 import com.school.sba.response_dto.AcademicProgramResponse;
@@ -41,6 +42,5 @@ public class AcademicProgramController {
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> setUserToAcademyProgram(@PathVariable int programId, @PathVariable int userId){
 		return academicProgramService.setUserToAcademyProgram(programId,userId);
 	}
-
 	
 }

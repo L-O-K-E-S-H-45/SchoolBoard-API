@@ -33,8 +33,8 @@ public class UserResponse {
 	
 //	private School school; // giving infinite loop during response between school & schedule
 	
-	private List<AcademicProgram> academicPrograms;
+	private List<Integer> academicProgramIds;
 	
-	private List<Subject>subjects; 
+	private List<Subject> subjects; 
 
 }
