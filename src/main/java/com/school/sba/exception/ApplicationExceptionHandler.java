@@ -48,8 +48,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "User does not exist for requested ID!!!");
 	}
 	
-	@ExceptionHandler(UnAuthourizeduserException.class)
-	public ResponseEntity<Object> handleUnAuthourizeduserException(UnAuthourizeduserException ex){
+	@ExceptionHandler(UnAuthourizedUserException.class)
+	public ResponseEntity<Object> handleUnAuthourizeduserException(UnAuthourizedUserException ex){
 		return structure(HttpStatus.UNAUTHORIZED, ex.getMessage(), "User is not a ADMIN");
 	}
 	
@@ -77,7 +77,18 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	public ResponseEntity<Object> handleAcademicProgramNotFoundByIdException(AcademicProgramNotFoundByIdException ex){
 		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "Academic-Program does not exist for requested Id!!!");
 	}
-
+	
+	
+	@ExceptionHandler(ClassHourNotFoundByIdException.class)
+	public ResponseEntity<Object> handleClassHourNotFoundByIdException(ClassHourNotFoundByIdException ex){
+		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "ClassHour does not exist for requested Id!!!");
+	}
+	
+	@ExceptionHandler(SubjectNotFoundByIdException.class)
+	public ResponseEntity<Object> handleSubjectNotFoundByIdException(SubjectNotFoundByIdException ex){
+		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "Subject does not exist for requested Id!!!");
+	}
+	
 }
 
 

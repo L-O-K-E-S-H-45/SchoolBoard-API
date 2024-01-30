@@ -15,7 +15,7 @@ import com.school.sba.entities.User;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.SchoolAlreadyExistException;
 import com.school.sba.exception.SchoolNotfoundByIdException;
-import com.school.sba.exception.UnAuthourizeduserException;
+import com.school.sba.exception.UnAuthourizedUserException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.UserRepository;
@@ -74,7 +74,7 @@ public class SchoolServiceimplementaion implements SchoolService  {
 							throw new SchoolAlreadyExistException("Failed to save School!!!");
 						
 					} else
-						throw new UnAuthourizeduserException("Failed to save School!!!");
+						throw new UnAuthourizedUserException("Failed to save School!!!");
 				})
 				.orElseThrow(()-> new UserNotFoundByIdException("Failed to save School!!!"));
 		

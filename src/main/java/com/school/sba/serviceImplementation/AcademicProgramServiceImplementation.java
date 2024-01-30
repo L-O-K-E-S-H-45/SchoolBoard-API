@@ -133,7 +133,7 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 				})
 				.orElseThrow(()-> new SchoolNotfoundByIdException("Failed to find all AcademicProgram!!!"));
 	}
-
+	
 	@Override
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> setUserToAcademyProgram(int programId, int userId) {
 		AcademicProgram academyProgram=academicProgramRepo.findById(programId)
@@ -146,7 +146,7 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 			throw new IllegalRequestException("Failed to set User to Academyic-Program b/z user is ADMIN");
 		
 		List<User> users=(academyProgram.getUsers()!=null)?academyProgram.getUsers():new ArrayList<>();
-		if (!users.contains(user))
+		if (!users.contains(user)) 
 			users.add(user);
 		else 
 			throw new IllegalRequestException("Failed to assign user to AcademicProgram b/z user already assigned to academy!!!");

@@ -56,8 +56,21 @@ public class UserController {
 	}
 	
 	@PutMapping("/subjects/{subjectId}/users/{userId}")
-	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(@PathVariable int subjectId, @PathVariable int userId){
+	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(
+			@PathVariable int subjectId, @PathVariable int userId){
 		return userService.assignSubjectsToTeacher(subjectId,userId);
+	}
+	
+	@PutMapping("/users/{userId}/academic-programs/{programId}")
+	public ResponseEntity<ResponseStructure<UserResponse>> setUserToAcademyProgram(
+			@PathVariable int userId, @PathVariable int programId){
+		return userService.setUserToAcademyProgram(userId,programId);
+	}
+
+	@GetMapping("/academic-programs/{programId}/user-roles/{userRole}/users")
+	public ResponseEntity<ResponseStructure<List<UserResponse>>> fetchUsersByProgramId(
+			@PathVariable int programId, @PathVariable String userRole){
+		return userService.fetchUsersByProgramId(programId,userRole);
 	}
 	
 }

@@ -53,4 +53,7 @@ public class AcademicProgram {
 	@ManyToMany
 	private List<Subject> subjects;
 	
+	@OneToMany(mappedBy = "academicProgram")
+	private List<ClassHour> classHours;
+	
 }

@@ -25,4 +25,8 @@ public interface UserService {
 
 	ResponseEntity<ResponseStructure<UserResponse>> assignSubjectsToTeacher(int subjectId, int userId);
 
+	ResponseEntity<ResponseStructure<UserResponse>> setUserToAcademyProgram(int userId, int programId);
+
+	ResponseEntity<ResponseStructure<List<UserResponse>>> fetchUsersByProgramId(int programId, String userRole);
+
 }
