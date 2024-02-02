@@ -31,5 +31,7 @@ public class AcademicProgramResponse {
 	private List<String> subjects;
 	
 	private List<String> usersNames;
+	
+	private boolean autoRepeatSchedule;
 
 }

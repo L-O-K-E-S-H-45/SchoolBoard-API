@@ -18,6 +18,7 @@ import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.SchoolNotfoundByIdException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepository;
+import com.school.sba.repository.ClassHourRepository;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.UserRepository;
 import com.school.sba.request_dto.AcademicProgramRequest;
@@ -37,6 +38,9 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 
 	@Autowired
 	private UserRepository userRepo;
+	
+	@Autowired
+	private ClassHourRepository classHourRepo;
 
 	@Autowired
 	private ResponseStructure<AcademicProgramResponse> structure;
@@ -47,6 +51,7 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 				.programName(academicProgramRequest.getProgramName())
 				.programBeginsAt(academicProgramRequest.getProgramBeginsAt())
 				.programEndsAt(academicProgramRequest.getProgramEndsAt())
+				.autoRepeatSchedule(academicProgramRequest.isAutoRepeatSchedule())
 				.build();
 	}
 
@@ -71,6 +76,7 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 				.programEndsAt(academicProgram.getProgramEndsAt())
 				.subjects(subjectList)
 				.usersNames(usersNames)
+				.autoRepeatSchedule(academicProgram.isAutoRepeatSchedule())
 				.build();
 	}
 
@@ -166,6 +172,70 @@ public class AcademicProgramServiceImplementation implements AcademicProgramServ
 		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure,HttpStatus.OK);
 
 	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteAcademyProgram(int programId) {
+		return academicProgramRepo.findById(programId)
+				.map(academy->{
+					if (academy.isDeleted())
+						throw new IllegalRequestException("Academy-Program already deleted!!!");
+					academy.setDeleted(true);
+					academy = academicProgramRepo.save(academy);
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("Academy-Program deleted successfully!!!");
+					structure.setData(mapObjectToAcademicProgramResponse(academy));
+					return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure,HttpStatus.OK);
+				})
+				.orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to delete Academic-Program!!!"));
+	}
+	
+	
+	public void permanentlydeleteAcademyPrpogram() {
+		System.out.println("----permanentlydeleteAcademyPrpogram() -> STARTS --------");
+		academicProgramRepo.findByIsDeletedTrue().forEach(academy->{
+			if (classHourRepo.existsByAcademicProgram(academy))
+				classHourRepo.deleteAll(academy.getClassHours());
+			academicProgramRepo.delete(academy);
+		});
+//		academicProgramRepo.deleteAll(academicProgramRepo.findByIsDeletedTrue());
+		System.out.println("--- permanentlydeleteAcademyPrpogram() -> ENDS ----");
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateAcademicProgram(int programId,AcademicProgramRequest academyProgramRequest) {
+		return academicProgramRepo.findById(programId)
+				.map(academy->{
+//					academy=mapRequestToAcademicProgram(academyProgramRequest);
+					
+					AcademicProgram academicProgram = mapRequestToAcademicProgram(academyProgramRequest);
+					academicProgram.setProgramId(programId);
+					
+					academicProgramRepo.save(academy);
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("Academy-Program updated successfully!!!");
+					structure.setData(mapObjectToAcademicProgramResponse(academy));
+					return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure,HttpStatus.OK);
+				})
+				.orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to update Academic-Program!!!"));
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> setAutoReapeatSchedule(int programId,
+			boolean autoRepeatSchedule) {
+		return academicProgramRepo.findById(programId)
+				.map(academy->{
+					academy.setAutoRepeatSchedule(autoRepeatSchedule);
+					academy=academicProgramRepo.save(academy);
+					academicProgramRepo.save(academy);
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("Successfully setAutoReapeatSchedule for Academy-Program!!!");
+					structure.setData(mapObjectToAcademicProgramResponse(academy));
+					return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure,HttpStatus.OK);
+				})
+				.orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to setAutoReapeatSchedule"));
+	}
+	
+	
 
 
 }

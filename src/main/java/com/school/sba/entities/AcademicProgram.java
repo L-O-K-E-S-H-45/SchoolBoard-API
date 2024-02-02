@@ -11,6 +11,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,16 +45,21 @@ public class AcademicProgram {
 //	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate programEndsAt;
 	
+	private boolean isDeleted;
+
+	private boolean autoRepeatSchedule;
+	
 	@ManyToOne
 	private School school;
 	
-	@ManyToMany
+	@ManyToMany(fetch=FetchType.EAGER)
 	private List<User> users;
 	
 	@ManyToMany
 	private List<Subject> subjects;
 	
-	@OneToMany(mappedBy = "academicProgram")
+	@OneToMany(mappedBy = "academicProgram",fetch=FetchType.EAGER)
 	private List<ClassHour> classHours;
+	
 	
 }

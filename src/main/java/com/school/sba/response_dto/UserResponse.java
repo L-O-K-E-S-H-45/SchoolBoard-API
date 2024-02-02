@@ -35,6 +35,6 @@ public class UserResponse {
 	
 	private List<Integer> academicProgramIds;
 	
-	private List<Subject> subjects; 
+	private Subject subject; 
 
 }

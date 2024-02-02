@@ -10,13 +10,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entities.AcademicProgram;
+import com.school.sba.entities.ClassHour;
+import com.school.sba.entities.Schedule;
 import com.school.sba.entities.School;
 import com.school.sba.entities.User;
 import com.school.sba.enums.UserRole;
+import com.school.sba.exception.IllegalRequestException;
 import com.school.sba.exception.SchoolAlreadyExistException;
 import com.school.sba.exception.SchoolNotfoundByIdException;
 import com.school.sba.exception.UnAuthourizedUserException;
 import com.school.sba.exception.UserNotFoundByIdException;
+import com.school.sba.repository.AcademicProgramRepository;
+import com.school.sba.repository.ClassHourRepository;
+import com.school.sba.repository.ScheduleRepository;
 import com.school.sba.repository.SchoolRepository;
 import com.school.sba.repository.UserRepository;
 import com.school.sba.request_dto.SchoolRequest;
@@ -32,6 +39,15 @@ public class SchoolServiceimplementaion implements SchoolService  {
 	
 	@Autowired
 	private UserRepository userRepo;
+	
+	@Autowired
+	private ScheduleRepository scheduleRepo;
+	
+	@Autowired
+	private AcademicProgramRepository academicProgramRepo;
+	
+	@Autowired
+	private ClassHourRepository classHourRepo;
 	
 	@Autowired
 	private ResponseStructure<SchoolResponse> structure;
@@ -138,27 +154,49 @@ public class SchoolServiceimplementaion implements SchoolService  {
 
 	@Override
 	public ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchool(int schoolId) {
-		Optional<School> optional = schoolRepo.findById(schoolId);
-		if (optional.isPresent()) {
-			School school = optional.get();
+		return schoolRepo.findById(schoolId)
+				.map(school->{
+					if (school.isDeleted())
+						throw new IllegalRequestException("School Already deleted!!!");
+					school.setDeleted(true);
+					school = schoolRepo.save(school);
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("School deleted successfully!!!");
+					structure.setData(mapSchoolObjectToSchoolResponse(school));
+					return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.OK);
+				})
+				.orElseThrow(()-> new SchoolNotfoundByIdException("School is not deleted!!!"));
+
+	}
+	
+	
+	public void permanentlyDeleteSchool() {
+		System.out.println("----permanentlyDeleteSchool() -> STARTS --------");
+		List<School> schools = schoolRepo.findByIsDeletedTrue();
+		System.out.println("SchoolSize => "+ schools.size());
+		
+		schools.forEach(school->{
+			
+			List<AcademicProgram> academicPrograms = school.getAcademicPrograms();
+			academicPrograms.forEach(program -> classHourRepo.deleteAll(program.getClassHours()));
+			academicProgramRepo.deleteAll(academicPrograms);
+			
+			List<User> users = userRepo.findBySchoolAndUserRoleNot(school, UserRole.ADMIN);
+			if (!users.isEmpty()) userRepo.deleteAll(users);
+			
+			userRepo.findByUserRole(UserRole.ADMIN).forEach(user -> {
+				if(user.getSchool() == school) {
+					user.setSchool(null);
+					userRepo.save(user);
+				}
+			});
 			
 			schoolRepo.delete(school);
-			
-			SchoolResponse response = new SchoolResponse();
-			response.setSchoolName(school.getSchoolName());
-//			response.setContactNo(school.getContactNo());
-//			response.setEmailId(school.getEmailId());
-//			response.setEmailId(school.getEmailId());
-			
-			ResponseStructure<SchoolResponse> structure = new ResponseStructure<>();
-			structure.setStatus(HttpStatus.FOUND.value());
-			structure.setMessage("School data deleted successfullY!!!");
-			structure.setData(response);
-			
-			return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure,HttpStatus.FOUND);
-		}
-		throw new SchoolNotfoundByIdException("School data did not deleted!!!");
+		});
+
+		System.out.println("----permanentlyDeleteSchool() -> ENDS --------");
 	}
+	
 
 }
 
