@@ -32,4 +32,15 @@ public class ClassHourController {
 			@RequestBody List<ClassHourRequest> classHourRequests){
 		return classHourService.updateClassHour(classHourRequests);
 	}
+	
+	@PostMapping("/academic-program/{programId}/autorepeat-schedule")
+	public ResponseEntity<ResponseStructure<String>> autoRepeatTimeTable(@PathVariable int programId){
+		return classHourService.autoRepeatTimeTable(programId);
+	}
 }
+
+
+
+
+
+

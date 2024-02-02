@@ -55,7 +55,7 @@ public class SchoolController {
 	}
 	
 	@DeleteMapping("/schools/{schoolId}")
-	@PreAuthorize("hasAuthority('ADMIN')")
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchool(@PathVariable int schoolId){
 		return schoolService.deleteSchool(schoolId);
 	}

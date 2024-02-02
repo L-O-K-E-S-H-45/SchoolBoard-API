@@ -15,5 +15,7 @@ public class AcademicProgramRequest {
 	private String programName;
 	private LocalDate programBeginsAt;
 	private LocalDate programEndsAt;
+	
+	private boolean autoRepeatSchedule;
 
 }

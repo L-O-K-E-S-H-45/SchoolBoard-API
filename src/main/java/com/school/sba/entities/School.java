@@ -2,6 +2,7 @@ package com.school.sba.entities;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,7 +33,9 @@ public class School {
 	private String schoolEmail;
 	private String schoolAddress;
 	
-	@OneToOne(mappedBy = "school")
+	private boolean isDeleted;
+	
+	@OneToOne(mappedBy = "school", cascade = CascadeType.REMOVE)
 	private Schedule schedule;
 	
 	@OneToMany(mappedBy = "school")

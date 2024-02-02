@@ -1,16 +1,21 @@
 package com.school.sba.serviceImplementation;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entities.AcademicProgram;
 import com.school.sba.entities.ClassHour;
 import com.school.sba.entities.Schedule;
 import com.school.sba.entities.Subject;
@@ -50,6 +55,9 @@ public class ClassHourServiceImplementation implements ClassHourService {
 	
 	@Autowired
 	private SubjectRepository subjectRepo;
+	
+	@Autowired
+	private ResponseStructure<String> structure;
 
 //	private ClassHour mapRequestToClassHourObject(ClassHourRequest classHourRequest) {
 //		return ClassHour.builder()
@@ -69,13 +77,25 @@ public class ClassHourServiceImplementation implements ClassHourService {
 						throw new IllegalRequestException("Failed to generate ClassHours b/z Schedule is not created!!!" );
 					System.out.println("program.getClassHours() -> "+
 							program.getClassHours() +" "+ program.getClassHours().isEmpty());
-					if (!program.getClassHours().isEmpty()) 
-						throw new IllegalRequestException("Failed to generate ClassHours b/z ClassHours is already assigned!!!");
+//					if (!program.getClassHours().isEmpty()) 
+//						throw new IllegalRequestException("Failed to generate ClassHours b/z ClassHours is already assigned!!!");
 					Schedule schedule=program.getSchool().getSchedule();
 					List<ClassHour> classHours = new ArrayList<>();
 					ClassHour lastClass=null;
 					LocalDate currenDate=program.getProgramBeginsAt();
-					for (int day=1;day<=6;day++) {
+					
+					DayOfWeek dayOfWeek = currenDate.getDayOfWeek();
+					System.out.println("Start Day -> "+dayOfWeek);
+
+					int noOfClasses=6;
+					
+					if(!currenDate.getDayOfWeek().equals(DayOfWeek.MONDAY))
+						noOfClasses=noOfClasses+7-currenDate.getDayOfWeek().getValue();
+					
+					for (int day=1;day<=noOfClasses;day++) {
+						if (currenDate.getDayOfWeek().equals(DayOfWeek.SUNDAY))
+							currenDate=currenDate.plusDays(1);
+						
 						for (int cls=1;cls<=schedule.getClassHoursPerDay();cls++) {
 							ClassHour curentClass = new ClassHour();
 							if (cls==1) {
@@ -103,7 +123,7 @@ public class ClassHourServiceImplementation implements ClassHourService {
 						program.setClassHours(classHours);
 						academicProgramRepo.save(program);
 
-					ResponseStructure<String> structure = new ResponseStructure<>();
+					
 					structure.setStatus(HttpStatus.CREATED.value());
 					structure.setMessage("class hour saved");
 					structure.setData("Class Hours generated Succussfully!!!");
@@ -129,7 +149,7 @@ public class ClassHourServiceImplementation implements ClassHourService {
 								.map(user1->{
 									if (!user1.getUserRole().equals(UserRole.TEACHER))
 										throw new IllegalRequestException("Failed to Update ClassHour "+classHourRequest.getClassHourId()+" b/z User "+ user1.getUserId() +" is not Teacher!!!");
-									if (!user1.getSubjects().contains(subject)) 
+									if (!user1.getSubject().equals(subject)) 
 										throw new IllegalRequestException("Failed to Update ClassHour "+classHourRequest.getClassHourId()+" b/z "+user1.getUserRole()+
 												" is not assigned with SubjectId: "+classHourRequest.getSubjectId());
 									else 
@@ -137,9 +157,12 @@ public class ClassHourServiceImplementation implements ClassHourService {
 								})
 						.orElseThrow(()-> new UserNotFoundByIdException("Failed to Update ClassHour!!!"));
 						
+						if (classhour.getAcademicProgram().getUsers()==null || !classhour.getAcademicProgram().getUsers().contains(user))
+							throw new IllegalRequestException("Failed to Update ClassHour b/z Academic-Program of "+
+									classHourRequest.getClassHourId()+" is not assigned with Teacher-"+classHourRequest.getUserId());
 						if (!classhour.getAcademicProgram().getSubjects().contains(subject))
 							throw new IllegalRequestException("Failed to Update ClassHour b/z Academic-Program of "+
-									classHourRequest.getClassHourId()+" is not assigned with "+classHourRequest.getSubjectId());
+									classHourRequest.getClassHourId()+" is not assigned with Subject-"+classHourRequest.getSubjectId());
 						if(classhour.getClassStatus().equals(ClassStatus.SCHEDULED))
 							throw new IllegalRequestException("Failed to Update ClassHour "+classHourRequest.getClassHourId()+" b/z ClassHour is Already Scheduled!!!");
 						
@@ -172,6 +195,79 @@ public class ClassHourServiceImplementation implements ClassHourService {
 		return new ResponseEntity<ResponseStructure<List<ClassHourResponse>>>(structure,HttpStatus.OK);
 		
 	}
+	
+// This is to autoRepeatSchedule if autoRepeatSchedule is true based on Scheduled time
+	public void autoRepeatSchedule() {
+		System.out.println("START ----------");
+		List<AcademicProgram> academicPrograms = academicProgramRepo.findByAutoRepeatScheduleTrue();
+		
+		if (!academicPrograms.isEmpty()) {
+			academicPrograms.forEach(academy->{
+				if (!classHourRepo.existsByAcademicProgram(academy)) // shall we call generateClassHour() method
+					throw new IllegalRequestException("Failed to Auto Repeat Time Table b/z for "
+							+ "AcademicProgram-"+academy.getProgramId()+" ClassHours are not generated");
+				
+				int classHoursPerDay=academy.getSchool().getSchedule().getClassHoursPerDay();
+				
+				List<ClassHour> classHours = classHourRepo.findLastNRecordsByAcademicProgram(academy,classHoursPerDay*6);
+				
+				Collections.reverse(classHours);
+				
+				classHours.forEach(ch->{
+					ClassHour classHour = new ClassHour();
+					classHour.setClassBeginsAt(ch.getClassBeginsAt().plusDays(7));
+					classHour.setClassEndsAt(ch.getClassEndsAt().plusDays(7));
+					classHour.setAcademicProgram(academy);
+					classHour.setClassStatus(ClassStatus.SCHEDULED);
+					classHour.setRoomNo(ch.getRoomNo());
+					classHour.setSubject(ch.getSubject());
+					classHour.setUser(ch.getUser());
+					classHourRepo.save(classHour);
+				});
+				
+			});
+		}
+		System.out.println("END--------------");
+	}
+
+
+	@Override  // This is to autoRepeatTimeTable by Client when autorepeatSchedule is false
+	public ResponseEntity<ResponseStructure<String>> autoRepeatTimeTable(int programId) {
+		
+		AcademicProgram academicProgram = academicProgramRepo.findById(programId).orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to Auto Repeat Time Table"));
+		
+		if (!classHourRepo.existsByAcademicProgram(academicProgram)) // shall we call generateClassHour() method
+			throw new IllegalRequestException("Failed to Auto Repeat Time Table b/z for "
+					+ "AcademicProgram-"+programId+" ClassHours are not generated");
+		
+		int classHoursPerDay=academicProgram.getSchool().getSchedule().getClassHoursPerDay();
+		
+		List<ClassHour> classHours = classHourRepo.findLastNRecordsByAcademicProgram(academicProgram,classHoursPerDay*6);
+		
+		Collections.reverse(classHours);
+		
+		classHours.forEach(ch->{
+			ClassHour classHour = new ClassHour();
+			classHour.setClassBeginsAt(ch.getClassBeginsAt().plusDays(7));
+			classHour.setClassEndsAt(ch.getClassEndsAt().plusDays(7));
+			classHour.setAcademicProgram(academicProgram);
+			classHour.setClassStatus(ClassStatus.SCHEDULED);
+			classHour.setRoomNo(ch.getRoomNo());
+			classHour.setSubject(ch.getSubject());
+			classHour.setUser(ch.getUser());
+			classHourRepo.save(classHour);
+		});
+
+		System.out.println("------END-------");
+		
+		structure.setStatus(HttpStatus.CREATED.value());
+		structure.setMessage("Auto Repeat ClassHour Time Table for Scheduled is Successfull");
+		structure.setData("Successfully created ClassHours");
+		
+		return new ResponseEntity<ResponseStructure<String>>(structure,HttpStatus.CREATED);
+	}
+	
+	
 
 }
 

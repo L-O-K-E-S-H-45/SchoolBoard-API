@@ -34,7 +34,7 @@ public class UserController {
 	}
 	
 	@PostMapping("/users")
-	@PreAuthorize("hasAuthority('ADMIN')")
+//	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<ResponseStructure<UserResponse>> addOtherUser(@RequestBody @Valid UserRequest userRequest){
 		return userService.addOtherUser(userRequest);
 	}

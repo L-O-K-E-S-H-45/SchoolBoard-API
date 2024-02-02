@@ -20,4 +20,12 @@ public interface AcademicProgramService {
 
 	ResponseEntity<ResponseStructure<AcademicProgramResponse>> setUserToAcademyProgram(int programId, int userId);
 
+	ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteAcademyProgram(int programId);
+
+	ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateAcademicProgram(int programId,
+			AcademicProgramRequest academicProgramRequest);
+
+	ResponseEntity<ResponseStructure<AcademicProgramResponse>> setAutoReapeatSchedule(int programId,
+			boolean autoRepeatSchedule);
+
 }

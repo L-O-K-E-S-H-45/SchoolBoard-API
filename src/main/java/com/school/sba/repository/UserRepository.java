@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.school.sba.entities.School;
 import com.school.sba.entities.User;
 import com.school.sba.enums.UserRole;
 
@@ -18,6 +19,16 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	
 	User findByEmail(String userEmail);
 	
-	User findByContactNo(long suerContactNo);
-
+	User findByContactNo(long userContactNo);
+	
+	//******************
+	List<User> findByUserRoleAndAcademicPrograms_ProgramId(UserRole userRole, int programId);
+	
+	// 
+	List<User> findByIsDeletedTrue();
+	
+	boolean existsBySchool(School school);
+	
+	List<User> findBySchoolAndUserRoleNot(School school, UserRole userRole);
+	
 }
