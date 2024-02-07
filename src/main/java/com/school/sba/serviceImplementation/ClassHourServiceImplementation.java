@@ -1,19 +1,30 @@
 package com.school.sba.serviceImplementation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.school.sba.entities.AcademicProgram;
 import com.school.sba.entities.ClassHour;
@@ -34,6 +45,7 @@ import com.school.sba.repository.ScheduleRepository;
 import com.school.sba.repository.SubjectRepository;
 import com.school.sba.repository.UserRepository;
 import com.school.sba.request_dto.ClassHourRequest;
+import com.school.sba.request_dto.ExcelRequestDto;
 import com.school.sba.response_dto.ClassHourResponse;
 import com.school.sba.service.ClassHourService;
 import com.school.sba.utility.ResponseStructure;
@@ -266,6 +278,145 @@ public class ClassHourServiceImplementation implements ClassHourService {
 		
 		return new ResponseEntity<ResponseStructure<String>>(structure,HttpStatus.CREATED);
 	}
+
+	@Override  // works only for standalone application
+	public ResponseEntity<ResponseStructure<String>> writeToExcell(int programId, ExcelRequestDto excelRequestDto) {
+		return academicProgramRepo.findById(programId)
+				.map(program->{
+					if (program.isDeleted())
+						throw new IllegalRequestException("Failed to write data to excel b/z program is deleted");
+					
+					XSSFWorkbook workbook = new XSSFWorkbook();
+					Sheet sheet = workbook.createSheet();
+					
+					int rowNumber=0;
+					Row header = sheet.createRow(0);
+					header.createCell(0).setCellValue("Date");
+					header.createCell(1).setCellValue("BeginsAt");
+					header.createCell(2).setCellValue("EndsAt");
+					header.createCell(3).setCellValue("Subject");
+					header.createCell(4).setCellValue("Teacher");
+					header.createCell(5).setCellValue("RoomNo");
+					
+					LocalDateTime from = excelRequestDto.getFromDate().atTime(LocalTime.MIDNIGHT);
+					LocalDateTime to = excelRequestDto.getToDate().atTime(LocalTime.MIDNIGHT).plusDays(1);
+					
+					List<ClassHour> classHours = classHourRepo.findAllByAcademicProgramAndClassBeginsAtBetween(program, from, to);       
+					
+					DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:MM");
+					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+					
+					for (ClassHour classHour : classHours) {
+						Row row = sheet.createRow(++rowNumber);
+						row.createCell(0).setCellValue(dateFormatter.format(classHour.getClassBeginsAt()));
+						row.createCell(1).setCellValue(timeFormatter.format(classHour.getClassBeginsAt()));
+						row.createCell(2).setCellValue(timeFormatter.format(classHour.getClassEndsAt()));
+						if (classHour.getSubject()==null)
+							row.createCell(3).setCellValue("");
+						else
+							row.createCell(3).setCellValue(classHour.getSubject().getSubjectName());
+						if (classHour.getUser()==null)
+							row.createCell(4).setCellValue("");
+						else
+							row.createCell(4).setCellValue(classHour.getUser().getUserName());
+						row.createCell(5).setCellValue(classHour.getRoomNo());
+					}
+					
+					try {
+						workbook.write(new FileOutputStream(excelRequestDto.getFilePath()+"\\classhour_prid-"+programId+"_from-"+dateFormatter.format(classHours.get(0).getClassBeginsAt())+".xlsx"));
+//						workbook.write(new FileOutputStream(excelRequestDto.getFilePath()+"\\classhour.xlsx"));
+					} catch (FileNotFoundException e) {
+						throw new IllegalRequestException(e.getMessage());
+					} catch (IOException e) {
+						throw new IllegalRequestException(e.getMessage());
+					}
+					
+					structure.setStatus(HttpStatus.OK.value());
+					structure.setMessage("Successfully fetched and written to excel");
+					structure.setData("Write to Excel is successfull!!!");
+					return new ResponseEntity<ResponseStructure<String>>(structure,HttpStatus.OK);
+					
+				})
+				.orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to write data to excel"));
+	}
+
+	@Override // This works for web Applications
+	public ResponseEntity<?> writeToExcel(int programId, LocalDate fromDate, LocalDate toDate, MultipartFile file) throws IOException{
+		return academicProgramRepo.findById(programId)
+				.map(program->{
+					if (program.isDeleted())
+						throw new IllegalRequestException("Failed to write data to excel b/z program is deleted");
+					
+					LocalDateTime from = fromDate.atTime(LocalTime.MIDNIGHT);
+					LocalDateTime to = toDate.atTime(LocalTime.MIDNIGHT).plusDays(1);
+					
+					List<ClassHour> classHours = classHourRepo.findAllByAcademicProgramAndClassBeginsAtBetween(program, from, to);
+					
+					if (classHours==null)
+						throw new IllegalRequestException("Failed to write data to excel b/z there is no classhours");
+					
+					DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:MM");
+					DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd");
+					
+					XSSFWorkbook workbook=null;
+					try {
+						workbook = new XSSFWorkbook(file.getInputStream());
+					} catch (IOException e) {
+						throw new IllegalRequestException(e.getMessage());
+					}
+					
+					workbook.forEach(sheet->{
+						int rowNumber = 0;
+						Row header = sheet.createRow(rowNumber);
+						header.createCell(0).setCellValue("Date");
+						header.createCell(1).setCellValue("BeginsAt");
+						header.createCell(2).setCellValue("EndsAt");
+						header.createCell(3).setCellValue("Subject");
+						header.createCell(4).setCellValue("Teacher");
+						header.createCell(5).setCellValue("RoomNo");
+						
+						for (ClassHour classHour : classHours) {
+							Row row = sheet.createRow(++rowNumber);
+							row.createCell(0).setCellValue(dateFormatter.format(classHour.getClassBeginsAt()));
+							row.createCell(1).setCellValue(timeFormatter.format(classHour.getClassBeginsAt()));
+							row.createCell(2).setCellValue(timeFormatter.format(classHour.getClassEndsAt()));
+							if (classHour.getSubject()==null)
+								row.createCell(3).setCellValue("");
+							else
+								row.createCell(3).setCellValue(classHour.getSubject().getSubjectName());
+							if (classHour.getUser()==null)
+								row.createCell(4).setCellValue("");
+							else
+								row.createCell(4).setCellValue(classHour.getUser().getUserName());
+							row.createCell(5).setCellValue(classHour.getRoomNo());
+						}
+						
+					});
+					
+					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+					try {
+						workbook.write(outputStream);  // here we are writing into same file not creating different file
+					} catch (IOException e) {
+						throw new IllegalRequestException(e.getMessage());
+					}
+					try {
+						workbook.close();
+					} catch (IOException e) {
+						throw new IllegalRequestException(e.getMessage());
+					}
+					
+					byte[] byteData = outputStream.toByteArray();
+					
+					return ResponseEntity.ok()
+							.header("Content Disposition", "attachment; filename="+file.getOriginalFilename())
+							.contentType(MediaType.APPLICATION_OCTET_STREAM)
+							.body(byteData);
+					
+					
+				})
+				.orElseThrow(()-> new AcademicProgramNotFoundByIdException("Failed to write data to excel"));
+	}
+
 	
 	
 

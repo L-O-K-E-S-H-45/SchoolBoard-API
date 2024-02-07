@@ -24,4 +24,7 @@ public interface ClassHourRepository extends JpaRepository<ClassHour, Integer> {
 	@Query("SELECT ch FROM ClassHour ch WHERE ch.academicProgram = :academicProgram "+
 			"ORDER BY ch.classHourId DESC LIMIT :lastNrecords")
 	List<ClassHour> findLastNRecordsByAcademicProgram(AcademicProgram academicProgram, int lastNrecords);
+	
+	List<ClassHour> findAllByAcademicProgramAndClassBeginsAtBetween(
+			AcademicProgram academicProgram, LocalDateTime classBeginsAt,LocalDateTime classEndsAt);
 }
